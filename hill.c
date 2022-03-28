@@ -5,13 +5,17 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
+#include <limits.h>
 #include <omp.h>
 
-#define DEBUG 0
+#define HEADER_LINES 6
+#define NUM_RUNS 20
+#define NUM_CITIES 442
+#define NUM_DIMS 2
 
-int city[442][2]; // city[id][0] = x of city id, city[id][1] = y of city id,
+int city[NUM_CITIES][NUM_DIMS]; // city[id][0] = x of city id, city[id][1] = y of city id,
 int city_count;
-int city_dis[442][442]; // distance between city, city_dis[id1][id2] = distance(id1,id2)
+int city_dis[NUM_CITIES][NUM_CITIES]; // distance between city, city_dis[id1][id2] = distance(id1,id2)
 
 int distance(int a, int b)
 {
@@ -115,7 +119,7 @@ int main(int argc, char **argv)
 	clock_t start = clock(), stop;
 	srand(time(NULL));
 	char line[70];
-	int jmp_counter = 6, i, j;
+	int jmp_counter = HEADER_LINES, i, j;
 	float x, y;
 	FILE *f;
 	if (argc < 2)
@@ -130,7 +134,7 @@ int main(int argc, char **argv)
 	{
 		if (strstr(line, "EOF") || line[0] == '\n')
 			break;
-		else if (jmp_counter)
+		else if (jmp_counter) // skip data file header
 		{
 			jmp_counter--;
 			continue;
@@ -141,7 +145,7 @@ int main(int argc, char **argv)
 			city_dis[city_count - 1][i] = city_dis[i][city_count - 1] = distance(i, city_count - 1);
 	}
 
-	int counter = 20, tmp, min = 9999999;
+	int counter = NUM_RUNS, tmp, min = INT_MAX;
 	float tot = 0;
 	while (counter--)
 	{
