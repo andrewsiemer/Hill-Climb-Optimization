@@ -1,3 +1,9 @@
+To run compile and all tests,
+```
+bash run_all.sh
+```
+
+-------------------- Below are original doc
 # Hill Climb Optimization 
 The projects goal is to optimize an old homework project that uses Hill climbing to solve the TSP problem.
 Our implementation strictly looks as using OpenMP and SIMD to gain speed-up.

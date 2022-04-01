@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 	f = fopen(argv[1], "r");
-	printf("\nhill climbing => %s\n---------------------\n", argv[1]);
+	printf("\n%s\n---------------------\n", argv[1]);
 	city_count = 0;
 	while (fgets(line, 70, f) != NULL)
 	{
