@@ -24,12 +24,12 @@ int distance(int a, int b)
 	return round(sqrt(x_dis * x_dis + y_dis * y_dis));
 }
 
-int route_distance(int *a)
+int route_distance(int *city)
 {
 	int i, tot_dis = 0;
 	for (i = 0; i < city_count - 1; i++)
-		tot_dis += city_dis[a[i]][a[i + 1]];
-	tot_dis += city_dis[a[0]][a[city_count - 1]];
+		tot_dis += city_dis[city[i]][city[i + 1]];
+	tot_dis += city_dis[city[0]][city[city_count - 1]];	// dist for tail ~ head
 	return tot_dis;
 }
 
@@ -90,11 +90,8 @@ int *get_start_state()
 	{
 		gen_id = rand() % city_count;
 		while (gened[gen_id])
-		{
-			gen_id++;
-			if (gen_id == city_count)
+			if (++gen_id == city_count)
 				gen_id = 0;
-		}
 		gened[gen_id] = 1;
 		start_state[gen_count++] = gen_id;
 	}
@@ -104,11 +101,11 @@ int *get_start_state()
 int hill()
 {
 	int i, j, ans;
-	int *now_state = get_start_state();
+	int *cur_state = get_start_state();
 	while (1)
 	{
-		ans = route_distance(now_state);
-		if ((now_state = get_neighbor(now_state)) == NULL)
+		ans = route_distance(cur_state);
+		if ((cur_state = get_neighbor(cur_state)) == NULL)
 			break;
 	}
 	return ans;
@@ -118,7 +115,7 @@ int main(int argc, char **argv)
 {
 	clock_t start = clock(), stop;
 	srand(time(NULL));
-	char line[70];
+	char line[200];
 	int jmp_counter = HEADER_LINES, i, j;
 	float x, y;
 	FILE *f;
@@ -141,21 +138,22 @@ int main(int argc, char **argv)
 		}
 		sscanf(line, "%*d %E %E", &x, &y);
 		city[city_count][0] = (int)x, city[city_count++][1] = (int)y;
+		// TODO: lazy-load instead of calculate and save all
 		for (i = 0; i < city_count - 1; i++)
 			city_dis[city_count - 1][i] = city_dis[i][city_count - 1] = distance(i, city_count - 1);
 	}
 
-	int counter = NUM_RUNS, tmp, min = INT_MAX;
+	int counter = NUM_RUNS, distance, min = 9999999;
 	float tot = 0;
-	while (counter--)
-	{
-		tmp = hill();
-		if (tmp < min)
-			min = tmp;
-		tot += (float)tmp;
-		printf("Final distance: %d\n", tmp);
+	printf("Final distances: ");
+	while (counter--) {
+		distance = hill();
+		if (distance < min)
+			min = distance;
+		tot += (float)distance;
+		printf(" %d", distance);
 	}
-	printf("min=%d avg=%f\n", min, tot / 20);
+	printf("\nmin: %d avg: %f\n", min, tot / 20);
 	stop = clock();
 	printf("total execution time: %f\n", (double)(stop - start) / (double)CLOCKS_PER_SEC);
 	return 0;
