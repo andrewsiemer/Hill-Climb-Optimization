@@ -9,7 +9,7 @@
 #include <omp.h>
 
 #define HEADER_LINES 6
-#define NUM_RUNS 1
+#define NUM_RUNS 20
 #define NUM_CITIES 13510
 #define NUM_DIMS 2
 
