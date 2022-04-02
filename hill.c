@@ -9,13 +9,13 @@
 #include <omp.h>
 
 #define HEADER_LINES 6
-#define NUM_RUNS 20
-#define NUM_CITIES 442
+#define NUM_RUNS 1
+#define NUM_CITIES 13510
 #define NUM_DIMS 2
 
-int city[NUM_CITIES][NUM_DIMS]; // city[id][0] = x of city id, city[id][1] = y of city id,
+int** city; // city[id][0] = x of city id, city[id][1] = y of city id,
+int** city_dis; // distance between city, city_dis[id1][id2] = distance(id1,id2)
 int city_count;
-int city_dis[NUM_CITIES][NUM_CITIES]; // distance between city, city_dis[id1][id2] = distance(id1,id2)
 
 int distance(int a, int b)
 {
@@ -69,13 +69,12 @@ int *get_neighbor(int *a)
 	{
 		ori_base = i == 0 ? city_dis[a[i]][a[city_count - 1]] : city_dis[a[i]][a[i - 1]];
 		for (j = i + 1; j < city_count; j++)
-		{
-			if (j - i >= city_count - 2)
-				continue;
-			j_right = (j == city_count - 1 ? 0 : j + 1);
-			if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j_right]]) < 0)
-				return gen_neighbor(a, i, j);
-		}
+			if (j - i < city_count - 2)
+			{
+				j_right = (j == city_count - 1 ? 0 : j + 1);
+				if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j_right]]) < 0)
+					return gen_neighbor(a, i, j);
+			}
 	}
 	return NULL;
 }
@@ -118,29 +117,34 @@ int main(int argc, char **argv)
 	char line[200];
 	int jmp_counter = HEADER_LINES, i, j;
 	float x, y;
-	FILE *f;
+	city = (int**)malloc(sizeof(int*)*NUM_CITIES);
+	city_dis = (int**)malloc(sizeof(int*)*NUM_CITIES);
+	for(i = 0; i < NUM_CITIES; i++){
+		city[i] = (int*)malloc(sizeof(int)*NUM_DIMS);
+		city_dis[i] = (int*)malloc(sizeof(int)*NUM_CITIES);
+	}
+		
 	if (argc < 2)
 	{
 		printf("format: ./hill filename\nfiles => eil51.tsp, lin105.tsp, pcb442.tsp\n");
 		exit(0);
 	}
+	FILE *f;
 	f = fopen(argv[1], "r");
 	printf("\n%s\n---------------------\n", argv[1]);
 	city_count = 0;
-	while (fgets(line, 70, f) != NULL)
+	while (fgets(line, 198, f) != NULL)
 	{
 		if (strstr(line, "EOF") || line[0] == '\n')
 			break;
-		else if (jmp_counter) // skip data file header
+		else if (jmp_counter-- <= 0) // skip data file header
 		{
-			jmp_counter--;
-			continue;
+			sscanf(line, "%*d %E %E", &x, &y);
+			city[city_count][0] = (int)x, city[city_count++][1] = (int)y;
+			// TODO: change to 1 dimension for speedup
+			for (i = 0; i < city_count - 1; i++)
+				city_dis[city_count - 1][i] = city_dis[i][city_count - 1] = distance(i, city_count - 1);
 		}
-		sscanf(line, "%*d %E %E", &x, &y);
-		city[city_count][0] = (int)x, city[city_count++][1] = (int)y;
-		// TODO: lazy-load instead of calculate and save all
-		for (i = 0; i < city_count - 1; i++)
-			city_dis[city_count - 1][i] = city_dis[i][city_count - 1] = distance(i, city_count - 1);
 	}
 
 	int counter = NUM_RUNS, distance, min = 9999999;
