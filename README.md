@@ -16,11 +16,17 @@ This is a working project for Carnegie Mellon University's 18646::How to Write F
 ## Usage
 `Usage: ./hill [-h] -f <datafile> -r <num_runs>`
 
-### Example usage
+### Usage example
 Using 'eil51.tsp' file and running 20 times.
 ```sh
 make
 ./hill -f data/eil51.tsp -r 20
+```
+
+### Reference usage example
+Using 'eil51.tsp' file and running 20 times using the baseline reference.
+```sh
+./hill-ref -f data/eil51.tsp -r 20
 ```
 
 ## Run All Tests
