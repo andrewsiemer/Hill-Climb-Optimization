@@ -116,27 +116,27 @@ int main(int argc, char **argv)
 {
 	int optFlag;
 	char *file = NULL;
-    while ((optFlag = getopt(argc, argv, "f:r:h")) != -1) {
-        switch (optFlag) {
-        case 'f':
-            file = optarg;
-            break;
-        case 'r':
-            num_runs = atoi(optarg);
-            break;
-        case 'h':
-            printf("Usage: ./hill [-h] -f <datafile> -r <num_runs>\n");
-            printf("Required:\n");
-            printf("  -f <datafile>		Input data file.\n");
-            printf("  -r <num>		Number of runs (Default: 1).\n");
-            printf("Options:\n");
-            printf("  -h              Prints this usage info.\n");
-            exit(0);
-        default:
-            printf("Usage: ./hill [-h] -f <datafile> -r <num_runs>\n");
-            exit(0);
-        }
-    }
+	while ((optFlag = getopt(argc, argv, "f:r:h")) != -1) {
+		switch (optFlag) {
+		case 'f':
+			file = optarg;
+			break;
+		case 'r':
+			num_runs = atoi(optarg);
+			break;
+		case 'h':
+			printf("Usage: ./hill [-h] -f <datafile> -r <num_runs>\n");
+			printf("Required:\n");
+			printf("  -f <datafile>		Input data file.\n");
+			printf("  -r <num>		Number of runs (Default: 1).\n");
+			printf("Options:\n");
+			printf("  -h              Prints this usage info.\n");
+			exit(0);
+		default:
+			printf("Usage: ./hill [-h] -f <datafile> -r <num_runs>\n");
+			exit(0);
+		}
+	}
 	if (!file) {
 		printf("Usage: ./hill [-h] -f <datafile> -r <num_runs>\n");
 		exit(0);
