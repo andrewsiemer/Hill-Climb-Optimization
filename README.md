@@ -1,9 +1,3 @@
-To run compile and all tests,
-```
-bash run_all.sh
-```
-
--------------------- Below are original doc
 # Hill Climb Optimization 
 The projects goal is to optimize an old homework project that uses Hill climbing to solve the TSP problem.
 Our implementation strictly looks as using OpenMP and SIMD to gain speed-up.
@@ -19,84 +13,55 @@ This is a working project for Carnegie Mellon University's 18646::How to Write F
 
 ***
 
-## Usage example
+## Usage
+`Usage: ./hill [-h] -f <datafile> -r <num_runs>`
+
+### Example usage
+Using 'eil51.tsp' file and running 20 times.
 ```sh
 make
 ./hill -f data/eil51.tsp -r 20
 ```
 
+## Run All Tests
+To compile, run all tests, and calculate total time/speed-up use:
+```sh
+bash run_all.sh
+```
+
 ## Baseline
-Average tour length, total runtime, best solution out of 20 run
+The baseline refers to the total execution time of 20 runs of each data file before improvements made.
 
-### hill climbing => eil51.tsp
-min: 432, avg: 447 
-execution time: 0.006962  
-* Final distance: 453
-* Final distance: 437
-* Final distance: 435
-* Final distance: 464
-* Final distance: 468
-* Final distance: 444
-* Final distance: 449
-* Final distance: 451
-* Final distance: 467
-* Final distance: 443
-* Final distance: 438
-* Final distance: 443
-* Final distance: 443
-* Final distance: 448
-* Final distance: 440
-* Final distance: 453
-* Final distance: 468
-* Final distance: 432
-* Final distance: 433
-* Final distance: 439
+```sh
+============= hill climbing =============
+running each 20 times...
 
+data/eil51.tsp
+---------------------
+Final distances: 445 437 467 441 448 453 442 449 439 448 451 459 449 431 465 446 447 464 447 450
+min: 431 avg: 448.899994
+total execution time: 0.010000
 
-### hill climbing => lin105.tsp
-min: 14467, avg: 15398 
-execution time: 0.073968
-* Final distance: 14845
-* Final distance: 15112
-* Final distance: 14849
-* Final distance: 15702
-* Final distance: 16110
-* Final distance: 15003
-* Final distance: 15234
-* Final distance: 15874
-* Final distance: 15878
-* Final distance: 14917
-* Final distance: 14919
-* Final distance: 15873
-* Final distance: 15990
-* Final distance: 15661
-* Final distance: 15731
-* Final distance: 15166
-* Final distance: 16100
-* Final distance: 15324
-* Final distance: 15203
-* Final distance: 14467
+data/lin105.tsp
+---------------------
+Final distances: 15430 14888 15139 15325 15039 14880 15016 15396 15421 15824 15890 16030 14930 15272 15441 15568 15386 15380 15509 15408
+min: 14880 avg: 15358.599609
+total execution time: 0.050000
 
-### hill climbing => pcb442.tsp
-min: 53088, avg: 54832 
-execution time: 8.057427  
-* Final distance: 54804
-* Final distance: 54460
-* Final distance: 55256
-* Final distance: 53901
-* Final distance: 54952
-* Final distance: 54752
-* Final distance: 55957
-* Final distance: 55520
-* Final distance: 56147
-* Final distance: 53088
-* Final distance: 55147
-* Final distance: 55615
-* Final distance: 54908
-* Final distance: 56073
-* Final distance: 54759
-* Final distance: 54258
-* Final distance: 54102
-* Final distance: 54227
-* Final distance: 54841
-* Final distance: 53873  
+data/pcb442.tsp
+---------------------
+Final distances: 54253 55988 55376 54161 54767 56328 55967 54988 53948 56613 55423 54185 55311 55626 55277 56067 54802 54917 54334 53989
+min: 53948 avg: 55116.000000
+total execution time: 4.970000
+
+data/pr2392.tsp
+---------------------
+Final distances: 408568 414040 411081 414499 414497 411914 416457 411809 418314 413042 414371 409176 411185 411861 418526 415912 417090 412908 415669 410558
+min: 408568 avg: 413573.843750
+total execution time: 2687.710000
+
+================ results ================
+TOTAL EXECTUTION TIME: 2692.740000
+TOTAL SPEED-UP: x1.0
+=========================================
+```

@@ -1,7 +1,7 @@
 #!/bin/bash
 make
 
-BASELINE=4.730000
+BASELINE=2692.740000
 NUM_RUNS=20
 TOTAL_TIME=0
 
@@ -28,7 +28,7 @@ for cmd in "${cmds[@]}"; do
     done
 done
 
-SPEEDUP=$(echo "$TOTAL_TIME / $BASELINE" | bc -l)
+SPEEDUP=$(echo "$BASELINE / $TOTAL_TIME" | bc -l)
 
 echo ""
 echo "================ results ================"
