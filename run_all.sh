@@ -31,6 +31,6 @@ SPEEDUP=$(echo "$BASELINE / $TOTAL_TIME" | bc -l)
 
 echo ""
 echo "================ results ================"
-echo "total execution time:  $TOTAL_TIME"
+echo "total execution time: $TOTAL_TIME"
 echo "total speed-up: x$SPEEDUP"
 echo "========================================="
