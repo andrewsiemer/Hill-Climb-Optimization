@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <getopt.h>
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
@@ -9,9 +10,10 @@
 #include <omp.h>
 
 #define HEADER_LINES 6
-#define NUM_RUNS 20
 #define NUM_CITIES 13510
 #define NUM_DIMS 2
+
+int num_runs = 1;
 
 int** city; // city[id][0] = x of city id, city[id][1] = y of city id,
 int** city_dis; // distance between city, city_dis[id1][id2] = distance(id1,id2)
@@ -112,6 +114,34 @@ int hill()
 
 int main(int argc, char **argv)
 {
+	int optFlag;
+	char *file = NULL;
+    while ((optFlag = getopt(argc, argv, "f:r:h")) != -1) {
+        switch (optFlag) {
+        case 'f':
+            file = optarg;
+            break;
+        case 'r':
+            num_runs = atoi(optarg);
+            break;
+        case 'h':
+            printf("Usage: ./hill [-h] -f <datafile> -r <num_runs>\n");
+            printf("Required:\n");
+            printf("  -f <datafile>		Input data file.\n");
+            printf("  -r <num>		Number of runs (Default: 1).\n");
+            printf("Options:\n");
+            printf("  -h              Prints this usage info.\n");
+            exit(0);
+        default:
+            printf("Usage: ./hill [-h] -f <datafile> -r <num_runs>\n");
+            exit(0);
+        }
+    }
+	if (!file) {
+		printf("Usage: ./hill [-h] -f <datafile> -r <num_runs>\n");
+		exit(0);
+	}
+
 	clock_t start = clock(), stop;
 	srand(time(NULL));
 	char line[200];
@@ -123,15 +153,10 @@ int main(int argc, char **argv)
 		city[i] = (int*)malloc(sizeof(int)*NUM_DIMS);
 		city_dis[i] = (int*)malloc(sizeof(int)*NUM_CITIES);
 	}
-		
-	if (argc < 2)
-	{
-		printf("format: ./hill filename\nfiles => eil51.tsp, lin105.tsp, pcb442.tsp\n");
-		exit(0);
-	}
+
 	FILE *f;
-	f = fopen(argv[1], "r");
-	printf("\n%s\n---------------------\n", argv[1]);
+	f = fopen(file, "r");
+	printf("\n%s\n---------------------\n", file);
 	city_count = 0;
 	while (fgets(line, 198, f) != NULL)
 	{
@@ -147,7 +172,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	int counter = NUM_RUNS, distance, min = 9999999;
+	int counter = num_runs, distance, min = 9999999;
 	float tot = 0;
 	printf("Final distances: ");
 	while (counter--) {

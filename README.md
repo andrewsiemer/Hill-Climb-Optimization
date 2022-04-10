@@ -8,7 +8,7 @@ bash run_all.sh
 The projects goal is to optimize an old homework project that uses Hill climbing to solve the TSP problem.
 Our implementation strictly looks as using OpenMP and SIMD to gain speed-up.
 
-There are three example data files in `/data`. The number in each testfile indicate the number of cities.
+There are five example data files in `/data`. The number in each testfile indicate the number of cities.
 
 ### The Team
 * Yen-Chun Chiu
@@ -22,7 +22,7 @@ This is a working project for Carnegie Mellon University's 18646::How to Write F
 ## Usage example
 ```sh
 make
-./hill data/eil51.tsp
+./hill -f data/eil51.tsp -r 20
 ```
 
 ## Baseline
