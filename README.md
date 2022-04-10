@@ -67,7 +67,7 @@ min: 408568 avg: 413573.843750
 total execution time: 2687.710000
 
 ================ results ================
-TOTAL EXECTUTION TIME: 2692.740000
-TOTAL SPEED-UP: x1.0
+total execution time: 2692.740000
+total speed-up: x1.0
 =========================================
 ```
