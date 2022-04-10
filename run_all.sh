@@ -16,14 +16,13 @@ cmds=(
     # "./hill -f data/usa13509.tsp -r $NUM_RUNS"
 )
 
-TOTAL_TIME=0
-substring="total execution time: "
+SUB="total execution time: "
 for cmd in "${cmds[@]}"; do
     readarray -t lines < <($cmd)
     for line in "${lines[@]}"; do
         echo ${line}
-        if [[ "${line}" == *"$substring"* ]]; then
-            TOTAL_TIME=$(echo "$TOTAL_TIME + ${line//$substring/}" | bc)
+        if [[ "${line}" == *"$SUB"* ]]; then
+            TOTAL_TIME=$(echo "$TOTAL_TIME + ${line//$SUB/}" | bc)
         fi
     done
 done
@@ -32,6 +31,6 @@ SPEEDUP=$(echo "$BASELINE / $TOTAL_TIME" | bc -l)
 
 echo ""
 echo "================ results ================"
-echo "TOTAL EXECTUTION TIME: $TOTAL_TIME"
-echo "TOTAL SPEED-UP: x$SPEEDUP"
+echo "total execution time:  $TOTAL_TIME"
+echo "total speed-up: x$SPEEDUP"
 echo "========================================="
