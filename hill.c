@@ -209,7 +209,7 @@ int main(int argc, char **argv)
 		printf(" %d", distance);
 
 		if (distance < min)
-			min = distance];
+			min = distance;
 		tot += (float)distance;
 	}
 	printf("\nmin: %d avg: %f\n", min, tot / 20);
