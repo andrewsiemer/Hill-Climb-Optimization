@@ -75,28 +75,40 @@ __attribute__((always_inline)) inline int neighbor_dis(int *a, int p1, int p2, i
 int *get_neighbor(int *a)
 {
 	int i, j, j_right;
-	float ori_base;
 
 	int lastIdx = city_count - 1;
 	int beforeLastIdx = city_count - 2;
-
-	for (i = 0; i < lastIdx; i++) {
-			ori_base = city_dis[a[i]][a[i - 1]];
-			if (i == 0) {
-				ori_base = city_dis[a[i]][a[lastIdx]];
-			}
-			for (j = i + 1; j < city_count; j++) {
-				if (j - i < beforeLastIdx) {
-					j_right = j + 1;
-					if (j == lastIdx) {
-						j_right = 0;
-					}
-					if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j_right]]) < 0)
-						return gen_neighbor(a, i, j);
+    float ori_base = city_dis[a[0]][a[lastIdx]];
+    
+    for (i = 0; i < 2;) {
+        for (j = i + 1; j < city_count; j++) {
+            if (j - i < beforeLastIdx) {
+				j_right = j + 1;
+				if (j == lastIdx) {
+					j_right = 0;
 				}
-			}
-	}
-	return NULL;
+                if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j_right]]) < 0)
+                    return gen_neighbor(a, i, j);
+            }
+        }
+        i++;
+        ori_base = city_dis[a[i]][a[i - 1]];
+    }
+
+    for (i = 2; i < lastIdx; i++) {
+        ori_base = city_dis[a[i]][a[i - 1]];
+        for (j = i + 1; j < lastIdx; j++) {
+            if (j - i < beforeLastIdx) {
+                if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j+1]]) < 0) {
+					return gen_neighbor(a, i, j);
+                }
+            }
+        }
+        if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[0]]) < 0) {
+            return gen_neighbor(a, i, j);
+        }
+    }
+    return NULL;
 }
 
 int *get_start_state()
@@ -160,7 +172,7 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
-	double start = omp_get_wtime(), stop;
+	double start = omp_get_wtime();
 	srand(time(NULL));
 	char line[200];
 	int jmp_counter = HEADER_LINES, i, j;
@@ -185,7 +197,6 @@ int main(int argc, char **argv)
 			sscanf(line, "%*d %E %E", &x, &y);
 			city[city_count][0] = (int)x, city[city_count++][1] = (int)y;
 			int lastCity = city_count - 1;
-			//#pragma omp for parallel shared(city_dis)
 			for (i = 0; i < city_count - 4; i+=4) {
 				float temp[8];
 				__m128 d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16;
@@ -259,10 +270,11 @@ int main(int argc, char **argv)
 		}
 	}
 
+	double init = omp_get_wtime();
 	int counter, distance, min = INT_MAX;
 	float tot = 0;
-
-	printf("Final distances: ");
+	
+	printf("final distances:");
 	#pragma omp parallel for shared(min,tot) private(distance)
 	for (counter = 0; counter < num_runs; counter++) {
 		distance = hill();
@@ -273,7 +285,8 @@ int main(int argc, char **argv)
 		tot += (float)distance;
 	}
 	printf("\nmin: %d avg: %f\n", min, tot / num_runs);
-	stop = omp_get_wtime();
-	printf("total execution time: %f\n", (double)(stop - start) );
+	printf("total initialize time: %f\n", (double)(init - start));
+	printf("total execution time: %f\n", (double)(omp_get_wtime() - start));
+
 	return 0;
 }
