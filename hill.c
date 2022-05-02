@@ -273,7 +273,7 @@ int main(int argc, char **argv)
 	double init = omp_get_wtime();
 	int counter, distance, min = INT_MAX;
 	float tot = 0;
-	
+
 	printf("final distances:");
 	#pragma omp parallel for shared(min,tot) private(distance)
 	for (counter = 0; counter < num_runs; counter++) {
