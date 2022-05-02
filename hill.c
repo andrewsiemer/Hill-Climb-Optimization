@@ -54,21 +54,18 @@ int *gen_neighbor(int *a, int i, int j)
 __attribute__((always_inline)) inline int neighbor_dis(int *a, int p1, int p2, int ori_part)
 {
 	int p1_left, p2_right, tmp, ans;
-	if (p1 > p2)
-	{
+	if (p1 > p2) {
 		tmp = p1;
 		p1 = p2;
 		p2 = tmp;
 	}
 	int lastCity = city_count - 1;
 	p1_left = p1 - 1;
-	if (p1 == 0) {
+	if (p1 == 0)
 		p1_left = lastCity;
-	}
 	p2_right = p2 + 1;
-	if (p2 == lastCity) {
+	if (p2 == lastCity)
 		p2_right = 0;
-	}
 	return city_dis[a[p1_left]][a[p2]] + city_dis[a[p2_right]][a[p1]] - ori_part;
 }
 
@@ -78,37 +75,37 @@ int *get_neighbor(int *a)
 
 	int lastIdx = city_count - 1;
 	int beforeLastIdx = city_count - 2;
-    float ori_base = city_dis[a[0]][a[lastIdx]];
-    
-    for (i = 0; i < 2;) {
-        for (j = i + 1; j < city_count; j++) {
-            if (j - i < beforeLastIdx) {
+	float ori_base = city_dis[a[0]][a[lastIdx]];
+
+	for (i = 0; i < 2;) {
+		for (j = i + 1; j < city_count; j++) {
+			if (j - i < beforeLastIdx) {
 				j_right = j + 1;
 				if (j == lastIdx) {
 					j_right = 0;
 				}
-                if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j_right]]) < 0)
-                    return gen_neighbor(a, i, j);
-            }
-        }
-        i++;
-        ori_base = city_dis[a[i]][a[i - 1]];
-    }
-
-    for (i = 2; i < lastIdx; i++) {
-        ori_base = city_dis[a[i]][a[i - 1]];
-        for (j = i + 1; j < lastIdx; j++) {
-            if (j - i < beforeLastIdx) {
-                if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j+1]]) < 0) {
+				if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j_right]]) < 0)
 					return gen_neighbor(a, i, j);
-                }
-            }
-        }
-        if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[0]]) < 0) {
-            return gen_neighbor(a, i, j);
-        }
-    }
-    return NULL;
+			}
+		}
+		i++;
+		ori_base = city_dis[a[i]][a[i - 1]];
+	}
+
+	for (i = 2; i < lastIdx; i++) {
+		ori_base = city_dis[a[i]][a[i - 1]];
+		for (j = i + 1; j < lastIdx; j++) {
+			if (j - i < beforeLastIdx) {
+				if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[j+1]]) < 0) {
+					return gen_neighbor(a, i, j);
+				}
+			}
+		}
+		if (neighbor_dis(a, i, j, ori_base + city_dis[a[j]][a[0]]) < 0) {
+			return gen_neighbor(a, i, j);
+		}
+	}
+	return NULL;
 }
 
 int *get_start_state()
@@ -117,8 +114,7 @@ int *get_start_state()
 	bool *gened = (bool *)malloc(sizeof(bool) * city_count);
 	memset(gened, 0, sizeof(bool) * city_count);
 	int gen_count = 0, gen_id;
-	while (gen_count < city_count)
-	{
+	while (gen_count < city_count) {
 		gen_id = rand() % city_count;
 		while (gened[gen_id])
 			if (++gen_id == city_count)
@@ -133,8 +129,7 @@ __attribute__((always_inline)) inline int hill()
 {
 	int ans;
 	int *cur_state = get_start_state();
-	while (1)
-	{
+	while (1) {
 		ans = route_distance(cur_state);
 		if ((cur_state = get_neighbor(cur_state)) == NULL)
 			break;
@@ -179,7 +174,7 @@ int main(int argc, char **argv)
 	float x, y;
 	city = (int**)malloc(sizeof(int*)*NUM_CITIES);
 	city_dis = (int**)malloc(sizeof(int*)*NUM_CITIES);
-	for(i = 0; i < NUM_CITIES; i++){
+	for (i = 0; i < NUM_CITIES; i++) {
 		city[i] = (int*)malloc(sizeof(int)*NUM_DIMS);
 		city_dis[i] = (int*)malloc(sizeof(int)*NUM_CITIES);
 	}
@@ -188,12 +183,10 @@ int main(int argc, char **argv)
 	f = fopen(file, "r");
 	printf("\n%s\n---------------------\n", file);
 	city_count = 0;
-	while (fgets(line, 198, f) != NULL)
-	{
+	while (fgets(line, 198, f) != NULL) {
 		if (strstr(line, "EOF") || line[0] == '\n')
 			break;
-		else if (jmp_counter-- <= 0) // skip data file header
-		{
+		else if (jmp_counter-- <= 0) { // skip data file header
 			sscanf(line, "%*d %E %E", &x, &y);
 			city[city_count][0] = (int)x, city[city_count++][1] = (int)y;
 			int lastCity = city_count - 1;
@@ -239,7 +232,7 @@ int main(int argc, char **argv)
 
 			// Handle the rest
 			for (; i < city_count - 4; i+=4) {
-			  float temp[4];
+				float temp[4];
 				__m128 d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
 
 				d1 = _mm_setr_ps(city[i][0], city[i+1][0], city[i+2][0], city[i+3][0]); // (x1,x2,x3,x4)
