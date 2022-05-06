@@ -190,7 +190,7 @@ int main(int argc, char **argv)
 			sscanf(line, "%*d %E %E", &x, &y);
 			city[city_count][0] = (int)x, city[city_count++][1] = (int)y;
 			int lastCity = city_count - 1;
-			for (i = 0; i < city_count - 4; i+=4) {
+			for (i = 0; i < lastCity - 8; i += 8) {
 				float temp[8];
 				__m128 d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16;
 
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 			}
 
 			// Handle the rest
-			for (; i < city_count - 4; i+=4) {
+			for (; i < lastCity - 4; i += 4) {
 				float temp[4];
 				__m128 d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
 
@@ -267,7 +267,7 @@ int main(int argc, char **argv)
 	int counter, distance, min = INT_MAX;
 	float tot = 0;
 
-	printf("final distances:");
+	printf("Final distances:");
 	#pragma omp parallel for shared(min,tot) private(distance)
 	for (counter = 0; counter < num_runs; counter++) {
 		distance = hill();
@@ -277,9 +277,10 @@ int main(int argc, char **argv)
 			min = distance;
 		tot += (float)distance;
 	}
-	printf("\nmin: %d avg: %f\n", min, tot / num_runs);
-	printf("total initialize time: %f\n", (double)(init - start));
-	printf("total execution time: %f\n", (double)(omp_get_wtime() - start));
+	double end = omp_get_wtime();
+	printf("\nMin: %d Avg: %f\n", min, tot / num_runs);
+	printf("Total initialization time: %f\n", (double)(init - start));
+	printf("Total execution time: %f\n", (double)(end - start));
 
 	return 0;
 }
