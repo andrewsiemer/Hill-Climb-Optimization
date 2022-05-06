@@ -19,6 +19,8 @@ int num_runs = 1;
 int** city; // city[id][0] = x of city id, city[id][1] = y of city id,
 int** city_dis; // distance between city, city_dis[id1][id2] = distance(id1,id2)
 int city_count;
+int city_count_int_size;
+int city_count_bool_size;
 
 __attribute__((always_inline)) inline int distance(int a, int b)
 {
@@ -31,8 +33,15 @@ __attribute__((always_inline)) inline int route_distance(int *city)
 {
 	int i, tot_dis = 0;
 	int lastIdx = city_count - 1;
-	for (i = 0; i < lastIdx; i++)
-		tot_dis += city_dis[city[i]][city[i + 1]]; // this reduction is memory bound
+
+	for (i = 0; i < lastIdx - 4; i += 4) {
+		// this reduction is memory bound
+		tot_dis += (city_dis[city[i]][city[i + 1]] + city_dis[city[i + 1]][city[i + 2]]
+			+ city_dis[city[i + 2]][city[i + 3]] + city_dis[city[i + 3]][city[i + 4]]);
+	}
+	for (; i < lastIdx; i++)
+		tot_dis += city_dis[city[i]][city[i + 1]];
+
 	tot_dis += city_dis[city[0]][city[lastIdx]];	// dist for tail ~ head
 	return tot_dis;
 }
@@ -40,7 +49,7 @@ __attribute__((always_inline)) inline int route_distance(int *city)
 int *gen_neighbor(int *a, int i, int j)
 { // swap the order of ith~jth city of array a and return
 	int tmp, k;
-	int *neighbor = (int *)malloc(sizeof(int) * city_count);
+	int *neighbor = (int *)malloc(city_count_int_size);
 	for (tmp = 0; tmp < i; tmp++)
 		neighbor[tmp] = a[tmp];
 	for (tmp = j + 1; tmp < city_count; tmp++)
@@ -110,9 +119,9 @@ int *get_neighbor(int *a)
 
 int *get_start_state()
 {
-	int *start_state = (int *)malloc(sizeof(int) * city_count);
-	bool *gened = (bool *)malloc(sizeof(bool) * city_count);
-	memset(gened, 0, sizeof(bool) * city_count);
+	int *start_state = (int *)malloc(city_count_int_size);
+	bool *gened = (bool *)malloc(city_count_bool_size);
+	memset(gened, 0, city_count_bool_size);
 	int gen_count = 0, gen_id;
 	while (gen_count < city_count) {
 		gen_id = rand() % city_count;
@@ -266,6 +275,8 @@ int main(int argc, char **argv)
 	double init = omp_get_wtime();
 	int counter, distance, min = INT_MAX;
 	float tot = 0;
+	city_count_int_size = sizeof(int) * city_count;
+	city_count_bool_size = sizeof(bool) * city_count;
 
 	printf("Final distances:");
 	#pragma omp parallel for shared(min,tot) private(distance)
