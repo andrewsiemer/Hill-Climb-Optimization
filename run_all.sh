@@ -1,12 +1,10 @@
 #!/bin/bash
 make
 
+TOTAL_ITERATION=3
 BASELINE=2692.740000
 NUM_RUNS=20
 TOTAL_TIME=0
-
-echo "============= hill climbing ============="
-echo "running each $NUM_RUNS times..."
 
 cmds=(
     "./hill -f data/eil51.tsp -r $NUM_RUNS"
@@ -16,21 +14,59 @@ cmds=(
     # "./hill -f data/usa13509.tsp -r $NUM_RUNS"
 )
 
-SUB="total execution time: "
-for cmd in "${cmds[@]}"; do
-    readarray -t lines < <($cmd)
-    for line in "${lines[@]}"; do
-        echo ${line}
-        if [[ "${line}" == *"$SUB"* ]]; then
-            TOTAL_TIME=$(echo "$TOTAL_TIME + ${line//$SUB/}" | bc)
-        fi
+min_vals=(  # Known optimal values for each dataset
+    "426"
+    "14379"
+    "50778"
+    "378032"
+    # "19982859"
+)
+
+SUB="Total execution time: "
+SUB2="Final distances:"
+
+for ((i=1;i<=$TOTAL_ITERATION;i++));
+do
+    echo ""
+    echo "============== Hill Climbing ($i/$TOTAL_ITERATION) =============="
+    echo "Running each dataset $NUM_RUNS times... "
+    TIME=0
+    for j in "${!cmds[@]}"; do
+        readarray -t lines < <(${cmds[$j]})
+        for line in "${lines[@]}"; do
+            echo ${line}
+            if [[ "${line}" == *"$SUB"* ]]; then
+                TIME=$(echo "$TIME + ${line//$SUB/}" | bc)
+            fi
+            if [[ "${line}" == *"$SUB2"* ]]; then
+                while IFS=' ' read -ra vals; do
+                    for k in "${!vals[@]}"; do
+                        if [[ $k -gt 1 ]]; then
+                            if [[ ${vals[$k]} < ${min_vals[$j]} ]]; then
+                                echo "Error: Invalid output ${vals[$k]} < ${min_vals[$j]}!"
+                            fi
+                        fi
+                    done
+                done <<< "${line}"
+            fi
+        done
     done
+
+    SPEEDUP=$(echo "$BASELINE / $TIME" | bc -l)
+    TOTAL_TIME=$(echo "$TOTAL_TIME + $TIME" | bc -l)
+
+    echo ""
+    echo "================ Results ($i / $TOTAL_ITERATION) ================"
+    echo "Total execution time: $TIME"
+    echo "Total speed-up: x$SPEEDUP"
+    echo "================================================="
 done
 
-SPEEDUP=$(echo "$BASELINE / $TOTAL_TIME" | bc -l)
-
+AVG_TIME=$(echo "$TOTAL_TIME / $TOTAL_ITERATION" | bc -l)
+AVG_SPEEDUP=$(echo "$BASELINE / $AVG_TIME" | bc -l)
 echo ""
-echo "================ results ================"
-echo "total execution time: $TOTAL_TIME"
-echo "total speed-up: x$SPEEDUP"
-echo "========================================="
+echo ""
+echo "================ Overall Results ================"
+echo "Average execution time: $AVG_TIME"
+echo "Average speed-up: x$AVG_SPEEDUP"
+echo "================================================="
