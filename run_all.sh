@@ -56,7 +56,7 @@ do
     TOTAL_TIME=$(echo "$TOTAL_TIME + $TIME" | bc -l)
 
     echo ""
-    echo "================ Results ($i / $TOTAL_ITERATION) ================"
+    echo "================ Results ($i/$TOTAL_ITERATION) ================"
     echo "Total execution time: $TIME"
     echo "Total speed-up: x$SPEEDUP"
     echo "================================================="
