@@ -181,11 +181,13 @@ int main(int argc, char **argv)
 	char line[200];
 	int jmp_counter = HEADER_LINES, i, j;
 	float x, y;
-	city = (int**)malloc(sizeof(int*)*NUM_CITIES);
-	city_dis = (int**)malloc(sizeof(int*)*NUM_CITIES);
+	int cities_int_size = sizeof(int*) * NUM_CITIES;
+	int dims_int_size = sizeof(int) * NUM_DIMS;
+	city = (int**) malloc(cities_int_size);
+	city_dis = (int**) malloc(cities_int_size);
 	for (i = 0; i < NUM_CITIES; i++) {
-		city[i] = (int*)malloc(sizeof(int)*NUM_DIMS);
-		city_dis[i] = (int*)malloc(sizeof(int)*NUM_CITIES);
+		city[i] = (int*) malloc(dims_int_size);
+		city_dis[i] = (int*) malloc(cities_int_size);
 	}
 
 	FILE *f;
