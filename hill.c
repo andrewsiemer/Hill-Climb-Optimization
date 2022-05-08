@@ -9,14 +9,25 @@
 #include <limits.h>
 #include <omp.h>
 #include <immintrin.h>
+#include <assert.h>
 
 #define HEADER_LINES 6
 #define NUM_CITIES 13510
 #define NUM_DIMS 2
 
+#define malloc2D(name, xDim, yDim, type) do {               \
+	name = (type **)malloc(xDim * sizeof(type *));          \
+	assert(name != NULL);                                   \
+	name[0] = (type *)malloc(xDim * yDim * sizeof(type));   \
+	assert(name[0] != NULL);                                \
+	size_t i;                                               \
+	for (i = 1; i < xDim; i++)                              \
+		name[i] = name[i-1] + yDim;                         \
+} while (0)
+
 int num_runs = 1;
 
-int** city; // city[id][0] = x of city id, city[id][1] = y of city id,
+int** city;     // city[id][0] = x of city id, city[id][1] = y of city id,
 int** city_dis; // distance between city, city_dis[id1][id2] = distance(id1,id2)
 int city_count;
 int city_count_int_size;
@@ -181,14 +192,8 @@ int main(int argc, char **argv)
 	char line[200];
 	int jmp_counter = HEADER_LINES, i, j;
 	float x, y;
-	int cities_int_size = sizeof(int*) * NUM_CITIES;
-	int dims_int_size = sizeof(int) * NUM_DIMS;
-	city = (int**) malloc(cities_int_size);
-	city_dis = (int**) malloc(cities_int_size);
-	for (i = 0; i < NUM_CITIES; i++) {
-		city[i] = (int*) malloc(dims_int_size);
-		city_dis[i] = (int*) malloc(cities_int_size);
-	}
+	malloc2D(city, NUM_CITIES, NUM_DIMS, int);
+	malloc2D(city_dis, NUM_CITIES, NUM_CITIES, int);
 
 	FILE *f;
 	f = fopen(file, "r");
@@ -228,23 +233,25 @@ int main(int argc, char **argv)
 				d13 = _mm_add_ps(d9, d10);
 				d14 = _mm_sqrt_ps(d13);
 
-				_mm_store_ps(&temp[0], d8);  // store sum into an array
-				_mm_store_ps(&temp[4], d14); // store sum into an array
+				d15 = _mm_round_ps(d8, (_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));
+				d16 = _mm_round_ps(d14, (_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));
+				_mm_store_ps(&temp[0], d15);  // store sum into an array
+				_mm_store_ps(&temp[4], d16); // store sum into an array
 
-				city_dis[lastCity][i] = city_dis[i][lastCity] = round(temp[0]);
-				city_dis[lastCity][i+1] = city_dis[i+1][lastCity] = round(temp[1]);
-				city_dis[lastCity][i+2] = city_dis[i+2][lastCity] = round(temp[2]);
-				city_dis[lastCity][i+3] = city_dis[i+3][lastCity] = round(temp[3]);
-				city_dis[lastCity][i+4] = city_dis[i+4][lastCity] = round(temp[4]);
-				city_dis[lastCity][i+5] = city_dis[i+5][lastCity] = round(temp[5]);
-				city_dis[lastCity][i+6] = city_dis[i+6][lastCity] = round(temp[6]);
-				city_dis[lastCity][i+7] = city_dis[i+7][lastCity] = round(temp[7]);
+				city_dis[lastCity][i] = city_dis[i][lastCity] = temp[0];
+				city_dis[lastCity][i+1] = city_dis[i+1][lastCity] = temp[1];
+				city_dis[lastCity][i+2] = city_dis[i+2][lastCity] = temp[2];
+				city_dis[lastCity][i+3] = city_dis[i+3][lastCity] = temp[3];
+				city_dis[lastCity][i+4] = city_dis[i+4][lastCity] = temp[4];
+				city_dis[lastCity][i+5] = city_dis[i+5][lastCity] = temp[5];
+				city_dis[lastCity][i+6] = city_dis[i+6][lastCity] = temp[6];
+				city_dis[lastCity][i+7] = city_dis[i+7][lastCity] = temp[7];
 			}
 
 			// Handle the rest
 			for (; i < lastCity - 4; i += 4) {
 				float temp[4];
-				__m128 d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
+				__m128 d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11;
 
 				d1 = _mm_setr_ps(city[i][0], city[i+1][0], city[i+2][0], city[i+3][0]); // (x1,x2,x3,x4)
 				d2 = _mm_set_ps1(city[lastCity][0]); // (x999,x999,x999,x999)
@@ -260,13 +267,14 @@ int main(int argc, char **argv)
 
 				d9 = _mm_add_ps(d7, d8);
 				d10 = _mm_sqrt_ps(d9);
+				d11 = _mm_round_ps(d10, (_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));
 
-				_mm_store_ps(&temp[0], d10); // store sum into an array
+				_mm_store_ps(&temp[0], d11); // store sum into an array
 
-				city_dis[lastCity][i] = city_dis[i][lastCity] = round(temp[0]);
-				city_dis[lastCity][i+1] = city_dis[i+1][lastCity] = round(temp[1]);
-				city_dis[lastCity][i+2] = city_dis[i+2][lastCity] = round(temp[2]);
-				city_dis[lastCity][i+3] = city_dis[i+3][lastCity] = round(temp[3]);
+				city_dis[lastCity][i] = city_dis[i][lastCity] = temp[0];
+				city_dis[lastCity][i+1] = city_dis[i+1][lastCity] = temp[1];
+				city_dis[lastCity][i+2] = city_dis[i+2][lastCity] = temp[2];
+				city_dis[lastCity][i+3] = city_dis[i+3][lastCity] = temp[3];
 			}
 			for (; i < lastCity; i++) {
 				city_dis[lastCity][i] = city_dis[i][lastCity] = distance(i, lastCity);
