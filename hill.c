@@ -142,6 +142,7 @@ int *get_start_state()
 		gened[gen_id] = 1;
 		start_state[gen_count++] = gen_id;
 	}
+	free(gened);
 	return start_state;
 }
 
@@ -154,6 +155,7 @@ __attribute__((always_inline)) inline int hill()
 		if ((cur_state = get_neighbor(cur_state)) == NULL)
 			break;
 	}
+	free(cur_state);
 	return ans;
 }
 
@@ -289,19 +291,30 @@ int main(int argc, char **argv)
 	city_count_bool_size = sizeof(bool) * city_count;
 
 	printf("Final distances:");
-	#pragma omp parallel for shared(min,tot) private(distance)
+	int *distances = malloc(sizeof(int) * num_runs);
+	#pragma omp parallel for
 	for (counter = 0; counter < num_runs; counter++) {
-		distance = hill();
-		printf(" %d", distance);
-
-		if (distance < min)
-			min = distance;
-		tot += (float)distance;
+		int local_distance = hill();
+		printf(" %d", local_distance);
+		distances[counter] = local_distance;
 	}
+	for (counter = 0; counter < num_runs; counter++) {
+		int d = distances[counter];
+		if (d < min)
+			min = d;
+		tot += d;
+	}
+
 	double end = omp_get_wtime();
 	printf("\nMin: %d Avg: %f\n", min, tot / num_runs);
 	printf("Total initialization time: %f\n", (double)(init - start));
 	printf("Total execution time: %f\n", (double)(end - start));
+
+	free(distances);
+	free(city[0]);
+	free(city);
+	free(city_dis[0]);
+	free(city_dis);
 
 	return 0;
 }
