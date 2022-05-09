@@ -45,6 +45,9 @@ do
                             if [[ ${vals[$k]} < ${min_vals[$j]} ]]; then
                                 echo "Error: Invalid output ${vals[$k]} < ${min_vals[$j]}!"
                             fi
+                            if [[ ${vals[$k]} == ${min_vals[$j]} ]]; then
+                                echo "We've found the optimal minimum path ${vals[$k]}!"
+                            fi
                         fi
                     done
                 done <<< "${line}"
