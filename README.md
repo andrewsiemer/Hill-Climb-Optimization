@@ -74,39 +74,39 @@ Total speed-up: x1.0
 
 ## Current Best
 ```
-============== Hill Climbing (3/3) ==============
+============== Hill Climbing (2/3) ==============
 Running each dataset 20 times... 
 
 data/eil51.tsp
 ---------------------
-Final distances: 456 459 442 436 445 444 435 454 448 434 460 447 447 443 444 443 441 436 436 458
-Min: 434 Avg: 445.399994
-Total initialization time: 0.015136
-Total execution time: 0.015993
+Final distances: 447 446 438 454 454 443 467 438 446 437 439 441 442 447 448 443 435 455 449 454
+Min: 435 Avg: 446.149994
+Total initialization time: 0.000238
+Total execution time: 0.002116
 
 data/lin105.tsp
 ---------------------
-Final distances: 14835 15946 15501 14701 15477 14585 15458 15638 15372 15666 14887 15292 15502 15564 15186 14820 14701 15393 15318 15620
-Min: 14585 Avg: 15273.099609
-Total initialization time: 0.014992
-Total execution time: 0.022062
+Final distances: 15632 15043 15644 14942 14515 15187 14821 16101 15358 15071 14798 15541 15046 14973 15130 15527 15923 15882 14734 16097
+Min: 14515 Avg: 15298.250000
+Total initialization time: 0.000326
+Total execution time: 0.006385
 
 data/pcb442.tsp
 ---------------------
-Final distances: 54539 54081 54724 54926 55134 54623 56072 54930 54297 55327 55981 55326 54640 55038 54611 53366 55960 56063 56536 56257
-Min: 53366 Avg: 55121.550781
-Total initialization time: 0.015457
-Total execution time: 0.685226
+Final distances: 54787 56476 54858 55152 54466 56173 54731 53787 54845 54616 53940 55201 54846 53859 54439 54098 54240 55151 54761 53531
+Min: 53531 Avg: 54697.851562
+Total initialization time: 0.001442
+Total execution time: 0.638123
 
 data/pr2392.tsp
 ---------------------
-Final distances: 415383 418791 413557 415800 411269 415899 409696 412782 414276 409344 413855 412601 416890 412492 415442 418454 411471 409454 416954 413322
-Min: 409344 Avg: 413886.593750
-Total initialization time: 0.047818
-Total execution time: 339.507847
+Final distances: 417535 419034 410432 415229 414485 415162 410174 412098 414421 418457 413302 414798 413052 410028 413828 418627 414247 409752 412302 411813
+Min: 409752 Avg: 413938.812500
+Total initialization time: 0.012770
+Total execution time: 315.227425
 
-================= Results (3/3) =================
-Total execution time: 340.231128
-Total speed-up: x7.91444338391048099514
+================= Results (2/3) =================
+Total execution time: 315.874049
+Total speed-up: x8.52472689201511454332
 =================================================
 ```
