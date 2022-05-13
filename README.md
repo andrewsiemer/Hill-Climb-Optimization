@@ -1,8 +1,7 @@
-# Hill Climb Optimization 
-The projects goal is to optimize an old homework project that uses Hill climbing to solve the TSP problem.
-Our implementation strictly looks as using OpenMP and SIMD to gain speed-up.
-
-There are five example data files in `/data`. The number in each testfile indicate the number of cities.
+# Hill Climb Optimization
+The project's goal is to optimize an old homework project that uses Hill climbing to solve the TSP problem. 
+Our implementation uses different optimization methods such as OpenMP and SIMD to gain speedup. We also provide a preliminary version of CUDA optimization to explore how CUDA can further help the performance boost.
+There are five sample data files in `/data`. We use them to measure the speedup against the baseline code for our experiment. The number in each data file indicates the total number of cities.
 
 ### The Team
 * Yen-Chun Chiu
@@ -40,7 +39,7 @@ The baseline refers to the total execution time of 20 runs of each data file bef
 
 ```sh
 ============== Hill Climbing (1/1) ==============
-Running each dataset 20 times... 
+Running each dataset 20 times...
 
 data/eil51.tsp
 ---------------------
@@ -75,7 +74,7 @@ Total speed-up: x1.0
 ## Current Best
 ```
 ============== Hill Climbing (2/3) ==============
-Running each dataset 20 times... 
+Running each dataset 20 times...
 
 data/eil51.tsp
 ---------------------
@@ -109,4 +108,16 @@ Total execution time: 315.227425
 Total execution time: 315.874049
 Total speed-up: x8.52472689201511454332
 =================================================
+```
+
+## Run CUDA Version
+Using 'eil51.tsp' file and running 20 times.
+```sh
+make cuda
+./hill-cuda -f data/eil51.tsp -r 20
+```
+
+To compile, run all tests, and calculate total time/speed-up use:
+```sh
+bash run_cuda_all.sh
 ```
