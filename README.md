@@ -1,6 +1,8 @@
 # Hill Climb Optimization
-The project's goal is to optimize an old homework project that uses Hill climbing to solve the TSP problem. 
+The project's goal is to optimize an old homework project that uses Hill climbing to solve the TSP problem.
+
 Our implementation uses different optimization methods such as OpenMP and SIMD to gain speedup. We also provide a preliminary version of CUDA optimization to explore how CUDA can further help the performance boost.
+
 There are five sample data files in `/data`. We use them to measure the speedup against the baseline code for our experiment. The number in each data file indicates the total number of cities.
 
 ### The Team
