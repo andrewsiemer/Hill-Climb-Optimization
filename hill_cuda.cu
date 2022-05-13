@@ -17,7 +17,7 @@
 #define NUM_DIMS 2
 
 // CUR_THREAD_NUM should be >= num_runs's next power of 2
-#define CUR_THREAD_NUM 512
+#define CUR_THREAD_NUM 256
 // The total amount of shared memory per block
 #define MAX_SHARED_MEM_SIZE_PER_BLOCK 49152
 
@@ -50,6 +50,19 @@ __attribute__((always_inline)) inline void checkCuda(cudaError_t e) {
 
 __attribute__((always_inline)) inline void checkLastCudaError() {
 	checkCuda(cudaGetLastError());
+}
+
+__attribute__((always_inline)) static inline int powerOfTwo(int n) {
+	n--;
+
+	n = n >>  1 | n;
+	n = n >>  2 | n;
+	n = n >>  4 | n;
+	n = n >>  8 | n;
+	n = n >> 16 | n;
+	// n = n >> 32 | n;    //  For 64-bit ints
+
+	return n;
 }
 
 __attribute__((always_inline)) inline int distance(int a, int b)
@@ -218,7 +231,7 @@ __global__ static void calculate_city_distances(
 __global__ static void do_hill_climbing_shared(
 	int num_runs,
 	int city_count,				 // Total # of cities
-	int *dev_distances,
+	int first_step,
 	int *dev_cities_dis)   // distance between city, city_dis[id1][id2] = distance(id1,id2)
 {
 	extern __shared__ int sharedMemory[];
@@ -241,23 +254,35 @@ __global__ static void do_hill_climbing_shared(
 
 	__syncthreads();
 
-	int min = INT_MAX;
-	int tot = 0;
 	if (threadIdx.x == 0) {
-		for (int counter = 0; counter < num_runs; ++counter) {
-			int d = distances[counter];
-			if (d < min)
-				min = d;
-			tot += d;
+		distances[num_runs] = 0;  // Store the reduction result
+	}
+	for (unsigned int s = first_step; s > 0; s >>= 1) {
+		if (threadIdx.x < s) {
+			int dist = 0, sum = distances[threadIdx.x];
+			int idx = threadIdx.x + s;
+			if (idx < num_runs) {
+				dist = distances[idx];
+				if (dist < distances[threadIdx.x]) {
+					distances[threadIdx.x] = dist;
+				}
+			}
+			if (s == first_step) {
+				atomicAdd(&distances[num_runs], dist + sum);
+			}
 		}
-		printf("\nMin: %d Avg: %f\n", distances[0], (float) tot / num_runs);
+		__syncthreads();
+	}
+
+	if (threadIdx.x == 0) {
+		printf("\nMin: %d Avg: %f\n", distances[0], (double) distances[num_runs] / num_runs);
 	}
 }
 
 __global__ static void do_hill_climbing(
 	int num_runs,
 	int city_count,				 // Total # of cities
-	int *dev_distances,
+	int first_step,
 	int *dev_cities_dis)   // distance between city, city_dis[id1][id2] = distance(id1,id2)
 {
 	extern __shared__ int sharedMemory[];
@@ -274,16 +299,28 @@ __global__ static void do_hill_climbing(
 
 	__syncthreads();
 
-	int min = INT_MAX;
-	int tot = 0;
 	if (threadIdx.x == 0) {
-		for (int counter = 0; counter < num_runs; ++counter) {
-			int d = distances[counter];
-			if (d < min)
-				min = d;
-			tot += d;
+		distances[num_runs] = 0;  // Store the reduction result
+	}
+	for (unsigned int s = first_step; s > 0; s >>= 1) {
+		if (threadIdx.x < s) {
+			int dist = 0, sum = distances[threadIdx.x];
+			int idx = threadIdx.x + s;
+			if (idx < num_runs) {
+				dist = distances[idx];
+				if (dist < distances[threadIdx.x]) {
+					distances[threadIdx.x] = dist;
+				}
+			}
+			if (s == first_step) {
+				atomicAdd(&distances[num_runs], dist + sum);
+			}
 		}
-		printf("\nMin: %d Avg: %f\n", distances[0], (float) tot / num_runs);
+		__syncthreads();
+	}
+
+	if (threadIdx.x == 0) {
+		printf("\nMin: %d Avg: %f\n", distances[0], (double) distances[num_runs] / num_runs);
 	}
 }
 
@@ -347,7 +384,6 @@ int main(int argc, char **argv)
 
 	int *dev_cities;     // city[id][0] = x of city id, city[id][1] = y of city id,
 	int *dev_cities_dis; // distance between city, city_dis[id1][id2] = distance(id1,id2)
-	int *dev_distances;
 
 	checkCuda(cudaMalloc(&dev_cities, cities_size));
 	checkCuda(cudaMalloc(&dev_cities_dis, city_dis_size));
@@ -361,21 +397,17 @@ int main(int argc, char **argv)
 
 	city_count_int_size = sizeof(int) * city_count;
 	city_count_bool_size = sizeof(bool) * city_count;
-	const unsigned int num_runs_int_size = num_runs * sizeof(int);
+	const unsigned int first_step = powerOfTwo(num_runs);
+	const unsigned int num_runs_int_size = (num_runs + 1) * sizeof(int); // The last one is for reduction
 	const unsigned int hill_block_shared_data_size = city_dis_size + num_runs_int_size;
-	checkCuda(cudaMalloc(&dev_distances, num_runs_int_size));
 
 	printf("Final distances:");
 	if (hill_block_shared_data_size <= MAX_SHARED_MEM_SIZE_PER_BLOCK) {
-		// printf("\nCUR_THREAD_NUM=%d hill_block_shared_data_size=%d num_reduction_threads=%d\n",
-			// CUR_THREAD_NUM, hill_block_shared_data_size, num_reduction_threads);
 		do_hill_climbing_shared<<< 1, CUR_THREAD_NUM, hill_block_shared_data_size >>>(
-			num_runs, city_count, dev_distances, dev_cities_dis
-		);
+			num_runs, city_count, first_step, dev_cities_dis);
 	} else {
 		do_hill_climbing<<< 1, CUR_THREAD_NUM, num_runs_int_size >>>(
-			num_runs, city_count, dev_distances, dev_cities_dis
-		);
+			num_runs, city_count, first_step, dev_cities_dis);
 	}
 	cudaDeviceSynchronize(); checkLastCudaError();
 
@@ -385,7 +417,6 @@ int main(int argc, char **argv)
 
 	checkCuda(cudaFree(dev_cities));
 	checkCuda(cudaFree(dev_cities_dis));
-	checkCuda(cudaFree(dev_distances));
 
 	free(city[0]);
 	free(city);
